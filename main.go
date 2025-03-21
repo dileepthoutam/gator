@@ -28,7 +28,7 @@ func (c *commands) run(s *state, cmd command) error {
 	if val, ok := c.Command[cmd.name]; ok {
 		return val(s, cmd)
 	}
-	return fmt.Errorf("Command doesn't exist")
+	return fmt.Errorf("Invalid command.")
 }
 
 func handlerLogin(s *state, cmd command) error {
@@ -49,10 +49,9 @@ func main() {
 	}
 
 	cmds := &commands{
-		Command: map[string]func(*state, command) error{
-			"login": handlerLogin,
-		},
+		Command: make(map[string]func(*state, command) error),
 	}
+	cmds.register("login", handlerLogin)
 
 	if len(os.Args) < 2 {
 		log.Println("Atleast pass one argument")
@@ -64,6 +63,9 @@ func main() {
 		args: os.Args[2:],
 	}
 
-	cmds.run(st, cmd)
+	err := cmds.run(st, cmd)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
